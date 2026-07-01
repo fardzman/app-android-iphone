@@ -333,6 +333,68 @@
     </div>
   </div>
 
+  <!-- BOTTOM SHEET: PROFILE SETTINGS -->
+  <div class="bottom-sheet-overlay" id="profileSheetOverlay">
+    <div class="bottom-sheet" id="profileSheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <h3>Настройки профиля</h3>
+        <button class="close-sheet-btn" id="closeProfileSheet"><i data-lucide="x"></i></button>
+      </div>
+      <form class="sheet-body" id="profileForm">
+        <!-- User Name -->
+        <div class="input-group">
+          <label for="profName">Ваше имя</label>
+          <input type="text" id="profName" name="name" placeholder="Введите имя" required>
+        </div>
+
+        <!-- Preset Avatars -->
+        <div class="input-group">
+          <label>Выберите аватар</label>
+          <div class="avatar-presets-grid">
+            <label class="preset-option" style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)">
+              <input type="radio" name="avatarPreset" value="preset-1" checked>
+              <span class="preset-check">✓</span>
+            </label>
+            <label class="preset-option" style="background: linear-gradient(135deg, #f59e0b 0%, #e11d48 100%)">
+              <input type="radio" name="avatarPreset" value="preset-2">
+              <span class="preset-check">✓</span>
+            </label>
+            <label class="preset-option" style="background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%)">
+              <input type="radio" name="avatarPreset" value="preset-3">
+              <span class="preset-check">✓</span>
+            </label>
+            <label class="preset-option" style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)">
+              <input type="radio" name="avatarPreset" value="preset-4">
+              <span class="preset-check">✓</span>
+            </label>
+            <label class="preset-option" style="background: linear-gradient(135deg, #d946ef 0%, #ec4899 100%)">
+              <input type="radio" name="avatarPreset" value="preset-5">
+              <span class="preset-check">✓</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Custom Avatar Upload -->
+        <div class="input-group">
+          <label>Или загрузите фото</label>
+          <div class="avatar-upload-wrapper">
+            <input type="file" id="profAvatarFile" accept="image/*" style="display: none;">
+            <button type="button" class="upload-btn" onclick="document.getElementById('profAvatarFile').click()">
+              <i data-lucide="image"></i> Выбрать файл
+            </button>
+            <span class="upload-status" id="uploadStatus">Файл не выбран</span>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">
+          <span>Сохранить профиль</span>
+          <i data-lucide="check"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
   <script src="app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

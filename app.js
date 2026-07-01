@@ -117,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupForms();
   setupHistoryFilters();
   setupCurrencySelector();
+  setupProfileSettings();
   
   // Initial render
   renderApp();
@@ -171,6 +172,9 @@ function updateHeaderDate() {
 function loadData() {
   try {
     state.currentCurrency = localStorage.getItem('af_currency') || 'RUB';
+    state.profileName = localStorage.getItem('af_profile_name') || 'Пользователь';
+    state.profileAvatar = localStorage.getItem('af_profile_avatar') || 'preset-1';
+    
     const storedAccounts = localStorage.getItem('af_accounts');
     const storedTransactions = localStorage.getItem('af_transactions');
     
@@ -186,6 +190,8 @@ function loadData() {
   } catch (e) {
     console.warn("Storage access is blocked or failed. Using seed data.", e);
     state.currentCurrency = 'RUB';
+    state.profileName = 'Пользователь';
+    state.profileAvatar = 'preset-1';
     state.accounts = [...SEED_ACCOUNTS];
     state.transactions = [...SEED_TRANSACTIONS];
   }
@@ -195,6 +201,8 @@ function saveData() {
   try {
     localStorage.setItem('af_accounts', JSON.stringify(state.accounts));
     localStorage.setItem('af_transactions', JSON.stringify(state.transactions));
+    localStorage.setItem('af_profile_name', state.profileName || 'Пользователь');
+    localStorage.setItem('af_profile_avatar', state.profileAvatar || 'preset-1');
   } catch (e) {
     console.warn("Storage write failed.", e);
   }
@@ -442,6 +450,7 @@ function setupHistoryFilters() {
 // UI Rendering
 // -------------------------------------------------------------
 function renderApp() {
+  renderUserProfile();
   renderTotalBalanceCard();
   renderAccountsGrid();
   renderExpensesCategories();
@@ -855,4 +864,123 @@ function formatCompact(num) {
   if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
   if (num >= 1000) return (num / 1000).toFixed(0) + 'k';
   return num;
+}
+
+// -------------------------------------------------------------
+// User Profile Logic
+// -------------------------------------------------------------
+function setupProfileSettings() {
+  const headerUser = document.querySelector('.header-user');
+  const overlay = document.getElementById('profileSheetOverlay');
+  const closeBtn = document.getElementById('closeProfileSheet');
+  const form = document.getElementById('profileForm');
+  const fileInput = document.getElementById('profAvatarFile');
+  const uploadStatus = document.getElementById('uploadStatus');
+  
+  if (!headerUser || !overlay || !form) return;
+  
+  let currentUploadedAvatar = null;
+  
+  // Open settings
+  headerUser.addEventListener('click', () => {
+    document.getElementById('profName').value = state.profileName || 'Пользователь';
+    
+    // Set active preset in dialog
+    const avatar = state.profileAvatar || 'preset-1';
+    if (avatar.startsWith('data:image')) {
+      // Custom image: uncheck presets, set status text
+      document.querySelectorAll('input[name="avatarPreset"]').forEach(radio => radio.checked = false);
+      uploadStatus.innerText = 'Своя фотография загружена';
+      currentUploadedAvatar = avatar;
+    } else {
+      // Preset
+      const radio = document.querySelector(`input[name="avatarPreset"][value="${avatar}"]`);
+      if (radio) radio.checked = true;
+      uploadStatus.innerText = 'Файл не выбран';
+      currentUploadedAvatar = null;
+    }
+    
+    overlay.classList.add('active');
+  });
+  
+  // Close settings
+  const closeProfile = () => {
+    overlay.classList.remove('active');
+  };
+  
+  closeBtn.addEventListener('click', closeProfile);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeProfile();
+  });
+  
+  // File Upload handling
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    uploadStatus.innerText = file.name;
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      currentUploadedAvatar = event.target.result; // Base64 Data URL
+      // Uncheck preset radio buttons since we are uploading a custom photo
+      document.querySelectorAll('input[name="avatarPreset"]').forEach(radio => radio.checked = false);
+    };
+    reader.readAsDataURL(file);
+  });
+  
+  // Form Submit
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const nameVal = document.getElementById('profName').value.trim();
+    if (!nameVal) return;
+    
+    state.profileName = nameVal;
+    
+    // Check if custom uploaded avatar is active or a preset
+    const checkedPreset = document.querySelector('input[name="avatarPreset"]:checked');
+    if (checkedPreset) {
+      state.profileAvatar = checkedPreset.value;
+    } else if (currentUploadedAvatar) {
+      state.profileAvatar = currentUploadedAvatar;
+    }
+    
+    saveData();
+    closeProfile();
+    renderApp();
+  });
+}
+
+function renderUserProfile() {
+  const avatarEl = document.querySelector('.avatar');
+  const greetingEl = document.querySelector('.greeting');
+  
+  if (!avatarEl || !greetingEl) return;
+  
+  greetingEl.innerText = `Привет, ${state.profileName || 'Пользователь'}`;
+  
+  const avatar = state.profileAvatar || 'preset-1';
+  if (avatar.startsWith('data:image')) {
+    avatarEl.style.background = `url(${avatar})`;
+    avatarEl.style.backgroundSize = 'cover';
+    avatarEl.style.backgroundPosition = 'center';
+    avatarEl.innerHTML = '';
+  } else {
+    avatarEl.style.background = getPresetGradient(avatar);
+    avatarEl.style.backgroundSize = '';
+    avatarEl.style.backgroundPosition = '';
+    const firstLetter = (state.profileName || 'П').trim().charAt(0).toUpperCase();
+    avatarEl.innerHTML = `<span>${firstLetter}</span>`;
+  }
+}
+
+function getPresetGradient(preset) {
+  switch (preset) {
+    case 'preset-2': return 'linear-gradient(135deg, #f59e0b 0%, #e11d48 100%)';
+    case 'preset-3': return 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)';
+    case 'preset-4': return 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)';
+    case 'preset-5': return 'linear-gradient(135deg, #d946ef 0%, #ec4899 100%)';
+    default: return 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)';
+  }
 }

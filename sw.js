@@ -1,4 +1,4 @@
-const CACHE_NAME = 'aerofinance-cache-v3';
+const CACHE_NAME = 'aerofinance-cache-v4';
 const ASSETS = [
   './',
   './index.html',
