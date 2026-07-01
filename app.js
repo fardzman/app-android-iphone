@@ -5,19 +5,20 @@
 // Initialize state
 let state = {
   accounts: [],
-  transactions: []
+  transactions: [],
+  currentCurrency: 'RUB'
 };
 
-// Available expense categories
+// Available expense categories (budgets in Rubles)
 const EXPENSE_CATEGORIES = [
-  { name: 'Продукты', icon: '🛒', color: 'var(--purple)', budget: 150000 },
-  { name: 'Рестораны', icon: '🍽️', color: 'var(--rose)', budget: 60000 },
-  { name: 'Транспорт', icon: '🚗', color: 'var(--cyan)', budget: 40000 },
-  { name: 'Развлечения', icon: '🎬', color: 'var(--amber)', budget: 50000 },
-  { name: 'Покупки', icon: '🛍️', color: 'var(--blue)', budget: 100000 },
-  { name: 'Жилье', icon: '🏠', color: 'var(--purple)', budget: 120000 },
-  { name: 'Здоровье', icon: '💊', color: 'var(--emerald)', budget: 30000 },
-  { name: 'Другое', icon: '📦', color: 'var(--text-muted)', budget: 50000 }
+  { name: 'Продукты', icon: '🛒', color: 'var(--purple)', budget: 35000 },
+  { name: 'Рестораны', icon: '🍽️', color: 'var(--rose)', budget: 15000 },
+  { name: 'Транспорт', icon: '🚗', color: 'var(--cyan)', budget: 8000 },
+  { name: 'Развлечения', icon: '🎬', color: 'var(--amber)', budget: 12000 },
+  { name: 'Покупки', icon: '🛍️', color: 'var(--blue)', budget: 25000 },
+  { name: 'Жилье', icon: '🏠', color: 'var(--purple)', budget: 30000 },
+  { name: 'Здоровье', icon: '💊', color: 'var(--emerald)', budget: 10000 },
+  { name: 'Другое', icon: '📦', color: 'var(--text-muted)', budget: 15000 }
 ];
 
 // Color mapping for account templates
@@ -30,23 +31,30 @@ const COLOR_MAP = {
   amber: '#f59e0b'
 };
 
-// Seed/Mock data to make the app look gorgeous at first launch
+// Seed/Mock data in Rubles
 const SEED_ACCOUNTS = [
-  { id: 'acc-1', name: 'Kaspi Gold', balance: 245000, type: 'card', color: 'purple' },
+  { id: 'acc-1', name: 'Сбербанк', balance: 245000, type: 'card', color: 'purple' },
   { id: 'acc-2', name: 'Наличные', balance: 35000, type: 'cash', color: 'cyan' },
-  { id: 'acc-3', name: 'Инвест Депозит', balance: 850000, type: 'savings', color: 'emerald' }
+  { id: 'acc-3', name: 'Накопительный счет', balance: 850000, type: 'savings', color: 'emerald' }
 ];
 
 const SEED_TRANSACTIONS = [
-  { id: 'tx-1', type: 'income', amount: 350000, category: 'Работа', accountId: 'acc-1', date: getRelativeDate(0), note: 'Заработная плата' },
-  { id: 'tx-2', type: 'expense', amount: 12500, category: 'Продукты', accountId: 'acc-1', date: getRelativeDate(-1), note: 'Magnum супермаркет' },
-  { id: 'tx-3', type: 'expense', amount: 4800, category: 'Рестораны', accountId: 'acc-1', date: getRelativeDate(-2), note: 'Обед в кофейне' },
-  { id: 'tx-4', type: 'expense', amount: 1500, category: 'Транспорт', accountId: 'acc-2', date: getRelativeDate(-2), note: 'Яндекс Такси' },
-  { id: 'tx-5', type: 'expense', amount: 15000, category: 'Развлечения', accountId: 'acc-1', date: getRelativeDate(-3), note: 'Билеты в кино и попкорн' },
-  { id: 'tx-6', type: 'expense', amount: 32000, category: 'Покупки', accountId: 'acc-1', date: getRelativeDate(-4), note: 'Одежда в ТРЦ' },
-  { id: 'tx-7', type: 'income', amount: 15000, category: 'Перевод', accountId: 'acc-2', date: getRelativeDate(-5), note: 'Долг от друга' },
-  { id: 'tx-8', type: 'expense', amount: 8200, category: 'Здоровье', accountId: 'acc-1', date: getRelativeDate(-6), note: 'Аптека' }
+  { id: 'tx-1', type: 'income', amount: 150000, category: 'Работа', accountId: 'acc-1', date: getRelativeDate(0), note: 'Заработная плата' },
+  { id: 'tx-2', type: 'expense', amount: 4500, category: 'Продукты', accountId: 'acc-1', date: getRelativeDate(-1), note: 'Супермаркет' },
+  { id: 'tx-3', type: 'expense', amount: 1200, category: 'Рестораны', accountId: 'acc-1', date: getRelativeDate(-2), note: 'Обед в кафе' },
+  { id: 'tx-4', type: 'expense', amount: 350, category: 'Транспорт', accountId: 'acc-2', date: getRelativeDate(-2), note: 'Автобус/Метро' },
+  { id: 'tx-5', type: 'expense', amount: 8000, category: 'Развлечения', accountId: 'acc-1', date: getRelativeDate(-3), note: 'Билеты в кино' },
+  { id: 'tx-6', type: 'expense', amount: 12000, category: 'Покупки', accountId: 'acc-1', date: getRelativeDate(-4), note: 'Одежда' },
+  { id: 'tx-7', type: 'income', amount: 5000, category: 'Перевод', accountId: 'acc-2', date: getRelativeDate(-5), note: 'Перевод от друга' },
+  { id: 'tx-8', type: 'expense', amount: 2400, category: 'Здоровье', accountId: 'acc-1', date: getRelativeDate(-6), note: 'Аптека' }
 ];
+
+// Exchange rates config (base is RUB)
+const EXCHANGE_RATES = {
+  RUB: 1,
+  USD: 90, // 1 USD = 90 RUB
+  EUR: 97  // 1 EUR = 97 RUB
+};
 
 // Helper to get dates relative to today
 function getRelativeDate(offsetDays) {
@@ -55,18 +63,41 @@ function getRelativeDate(offsetDays) {
   return d.toISOString().split('T')[0];
 }
 
-// Format currency
+// Format currency (handles conversion dynamically based on state.currentCurrency)
 function formatCurrency(amount) {
   try {
-    return new Intl.NumberFormat('ru-RU', {
-      style: 'currency',
-      currency: 'KZT',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2
-    }).format(amount).replace('KZT', '₸');
+    const currency = state.currentCurrency || 'RUB';
+    const rate = EXCHANGE_RATES[currency] || 1;
+    const converted = amount / rate;
+    
+    if (currency === 'RUB') {
+      return new Intl.NumberFormat('ru-RU', {
+        style: 'currency',
+        currency: 'RUB',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      }).format(converted);
+    } else if (currency === 'USD') {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      }).format(converted);
+    } else if (currency === 'EUR') {
+      return new Intl.NumberFormat('de-DE', {
+        style: 'currency',
+        currency: 'EUR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      }).format(converted);
+    }
+    return converted.toFixed(0) + ' ' + currency;
   } catch (e) {
-    console.warn("Intl currency formatting failed, using fallback.", e);
-    return amount.toFixed(0) + ' ₸';
+    console.warn("Currency formatting failed, using fallback.", e);
+    const symbol = state.currentCurrency === 'USD' ? '$' : state.currentCurrency === 'EUR' ? '€' : '₽';
+    const rate = EXCHANGE_RATES[state.currentCurrency] || 1;
+    return (amount / rate).toFixed(0) + ' ' + symbol;
   }
 }
 
@@ -85,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupBottomSheets();
   setupForms();
   setupHistoryFilters();
+  setupCurrencySelector();
   
   // Initial render
   renderApp();
@@ -94,6 +126,37 @@ document.addEventListener('DOMContentLoaded', () => {
     window.lucide.createIcons();
   }
 });
+
+function setupCurrencySelector() {
+  const selector = document.getElementById('currencySelector');
+  if (!selector) return;
+  
+  // Set initial active state based on loaded currency
+  const activeBtn = selector.querySelector(`.currency-btn[data-currency="${state.currentCurrency}"]`);
+  if (activeBtn) {
+    selector.querySelectorAll('.currency-btn').forEach(btn => btn.classList.remove('active'));
+    activeBtn.classList.add('active');
+  }
+  
+  selector.querySelectorAll('.currency-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = btn.getAttribute('data-currency');
+      state.currentCurrency = cur;
+      
+      // Update active styling
+      selector.querySelectorAll('.currency-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      // Persist choice
+      try {
+        localStorage.setItem('af_currency', cur);
+      } catch (err) {}
+      
+      // Re-render to show converted values
+      renderApp();
+    });
+  });
+}
 
 // Update today's date in human readable format
 function updateHeaderDate() {
@@ -107,6 +170,7 @@ function updateHeaderDate() {
 // Storage Helpers
 function loadData() {
   try {
+    state.currentCurrency = localStorage.getItem('af_currency') || 'RUB';
     const storedAccounts = localStorage.getItem('af_accounts');
     const storedTransactions = localStorage.getItem('af_transactions');
     
@@ -121,6 +185,7 @@ function loadData() {
     }
   } catch (e) {
     console.warn("Storage access is blocked or failed. Using seed data.", e);
+    state.currentCurrency = 'RUB';
     state.accounts = [...SEED_ACCOUNTS];
     state.transactions = [...SEED_TRANSACTIONS];
   }
