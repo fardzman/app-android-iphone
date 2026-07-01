@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0d0b18">
+  <title>AeroFinance — Умный учет финансов</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Ambient background moving blobs -->
+  <div class="ambient-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-user">
+        <div class="avatar">
+          <span>K</span>
+        </div>
+        <div class="welcome-text">
+          <span class="greeting">Привет, Пользователь</span>
+          <span class="date-today" id="currentDate">30 июня 2026</span>
+        </div>
+      </div>
+      <button class="notification-btn" aria-label="Notifications" id="notificationBtn">
+        <i data-lucide="bell"></i>
+        <span class="badge"></span>
+      </button>
+    </header>
+
+    <!-- Total Balance Card -->
+    <section class="balance-card-wrapper">
+      <div class="balance-card">
+        <div class="card-glow"></div>
+        <div class="balance-meta">
+          <span>Общий баланс</span>
+          <span class="trend positive" id="balanceTrend"><i data-lucide="trending-up"></i> +0.0%</span>
+        </div>
+        <div class="balance-amount" id="totalBalance">0.00 ₸</div>
+        <div class="balance-flow">
+          <div class="flow-item income">
+            <span class="flow-icon"><i data-lucide="arrow-down-left"></i></span>
+            <div class="flow-info">
+              <span class="flow-label">Доходы</span>
+              <span class="flow-val" id="totalIncome">0.00 ₸</span>
+            </div>
+          </div>
+          <div class="flow-item expense">
+            <span class="flow-icon"><i data-lucide="arrow-up-right"></i></span>
+            <div class="flow-info">
+              <span class="flow-label">Расходы</span>
+              <span class="flow-val" id="totalExpense">0.00 ₸</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Area -->
+    <main class="app-content">
+      
+      <!-- TAB 1: ACCOUNTS (Учёт) -->
+      <section id="tab-accounts" class="tab-pane active">
+        <div class="section-header">
+          <h2>Мои Счета</h2>
+          <button class="btn-text" id="addAccountBtn">
+            <i data-lucide="plus"></i> Новый счет
+          </button>
+        </div>
+        
+        <!-- Accounts Grid -->
+        <div class="accounts-grid" id="accountsList">
+          <!-- Dynamically populated -->
+        </div>
+
+        <div class="section-header mt-8">
+          <h2>Анализ Счетов</h2>
+        </div>
+        <div class="chart-card">
+          <div class="chart-wrapper">
+            <div id="accountsChartContainer" class="svg-chart-container">
+              <!-- Dynamically populated SVG Donut -->
+            </div>
+          </div>
+          <div class="chart-legend" id="accountsChartLegend">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: EXPENSES (Расходы) -->
+      <section id="tab-expenses" class="tab-pane">
+        <div class="section-header">
+          <h2>Категории расходов</h2>
+          <button class="btn-text" id="addExpenseQuickBtn">
+            <i data-lucide="plus"></i> Внести расход
+          </button>
+        </div>
+
+        <!-- Expense Categories list -->
+        <div class="categories-list" id="categoriesList">
+          <!-- Dynamically populated -->
+        </div>
+
+        <div class="section-header mt-8">
+          <h2>Динамика расходов</h2>
+        </div>
+        <div class="chart-card">
+          <div class="chart-wrapper">
+            <div id="expensesTrendContainer" class="svg-chart-container">
+              <!-- Dynamically populated SVG Line Chart -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: HISTORY (История) -->
+      <section id="tab-history" class="tab-pane">
+        <div class="section-header">
+          <h2>История операций</h2>
+          <div class="history-actions">
+            <button class="btn-text" id="clearHistoryBtn">Очистить</button>
+          </div>
+        </div>
+
+        <!-- Filter Chips -->
+        <div class="filter-container">
+          <button class="filter-chip active" data-filter="all">Все</button>
+          <button class="filter-chip" data-filter="income">Доходы</button>
+          <button class="filter-chip" data-filter="expense">Расходы</button>
+        </div>
+
+        <!-- History list -->
+        <div class="history-list" id="historyList">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Action Button (Floating Action) -->
+    <div class="fab-container">
+      <button class="fab-btn" id="mainFab" aria-label="Add Transaction">
+        <i data-lucide="plus"></i>
+      </button>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-target="tab-accounts">
+        <i data-lucide="wallet"></i>
+        <span>Учёт</span>
+      </button>
+      <button class="nav-item" data-target="tab-expenses">
+        <i data-lucide="pie-chart"></i>
+        <span>Расходы</span>
+      </button>
+      <button class="nav-item" data-target="tab-history">
+        <i data-lucide="list"></i>
+        <span>История</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- BOTTOM SHEET: ADD TRANSACTION -->
+  <div class="bottom-sheet-overlay" id="transactionSheetOverlay">
+    <div class="bottom-sheet" id="transactionSheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <h3 id="sheetTitle">Новая транзакция</h3>
+        <button class="close-sheet-btn" id="closeTransactionSheet"><i data-lucide="x"></i></button>
+      </div>
+      <form class="sheet-body" id="transactionForm">
+        <!-- Transaction Type Switcher -->
+        <div class="type-switcher">
+          <input type="radio" id="typeExpense" name="txType" value="expense" checked>
+          <label for="typeExpense">Расход</label>
+          
+          <input type="radio" id="typeIncome" name="txType" value="income">
+          <label for="typeIncome">Доход</label>
+          <span class="switcher-bg"></span>
+        </div>
+
+        <!-- Amount Input -->
+        <div class="input-group amount-group">
+          <label for="txAmount">Сумма (₸)</label>
+          <div class="amount-input-wrapper">
+            <input type="number" id="txAmount" name="amount" placeholder="0" min="0.01" step="0.01" required>
+            <span class="currency-symbol">₸</span>
+          </div>
+        </div>
+
+        <!-- Account Selection -->
+        <div class="input-group">
+          <label for="txAccount">Счёт</label>
+          <select id="txAccount" name="accountId" required>
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+
+        <!-- Category Selection -->
+        <div class="input-group" id="categoryInputGroup">
+          <label for="txCategory">Категория</label>
+          <select id="txCategory" name="category">
+            <option value="Продукты">🛒 Продукты</option>
+            <option value="Рестораны">🍽️ Кафе и Рестораны</option>
+            <option value="Транспорт">🚗 Транспорт</option>
+            <option value="Развлечения">🎬 Развлечения</option>
+            <option value="Покупки">🛍️ Покупки</option>
+            <option value="Жилье">🏠 Жилье & ЖКХ</option>
+            <option value="Здоровье">💊 Здоровье</option>
+            <option value="Другое">📦 Другое</option>
+          </select>
+        </div>
+
+        <!-- Date Input -->
+        <div class="input-group">
+          <label for="txDate">Дата</label>
+          <input type="date" id="txDate" name="date" required>
+        </div>
+
+        <!-- Description -->
+        <div class="input-group">
+          <label for="txNote">Комментарий</label>
+          <input type="text" id="txNote" name="note" placeholder="Например: Продукты на неделю">
+        </div>
+
+        <button type="submit" class="submit-btn">
+          <span>Сохранить операцию</span>
+          <i data-lucide="check"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- BOTTOM SHEET: ADD ACCOUNT -->
+  <div class="bottom-sheet-overlay" id="accountSheetOverlay">
+    <div class="bottom-sheet" id="accountSheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <h3>Новый счет</h3>
+        <button class="close-sheet-btn" id="closeAccountSheet"><i data-lucide="x"></i></button>
+      </div>
+      <form class="sheet-body" id="accountForm">
+        <!-- Account Name -->
+        <div class="input-group">
+          <label for="accName">Название счета</label>
+          <input type="text" id="accName" name="name" placeholder="Например: Kaspi Gold" required>
+        </div>
+
+        <!-- Initial Balance -->
+        <div class="input-group amount-group">
+          <label for="accBalance">Начальный баланс (₸)</label>
+          <div class="amount-input-wrapper">
+            <input type="number" id="accBalance" name="balance" placeholder="0" step="0.01" required>
+            <span class="currency-symbol">₸</span>
+          </div>
+        </div>
+
+        <!-- Account Type -->
+        <div class="input-group">
+          <label for="accType">Тип</label>
+          <select id="accType" name="type" required>
+            <option value="card">💳 Банковская карта</option>
+            <option value="cash">💵 Наличные</option>
+            <option value="savings">🐷 Сбережения / Депозит</option>
+          </select>
+        </div>
+
+        <!-- Color theme picker -->
+        <div class="input-group">
+          <label>Цвет оформления</label>
+          <div class="color-picker-grid">
+            <label class="color-option color-purple">
+              <input type="radio" name="color" value="purple" checked>
+              <span class="color-dot"></span>
+            </label>
+            <label class="color-option color-blue">
+              <input type="radio" name="color" value="blue">
+              <span class="color-dot"></span>
+            </label>
+            <label class="color-option color-cyan">
+              <input type="radio" name="color" value="cyan">
+              <span class="color-dot"></span>
+            </label>
+            <label class="color-option color-emerald">
+              <input type="radio" name="color" value="emerald">
+              <span class="color-dot"></span>
+            </label>
+            <label class="color-option color-rose">
+              <input type="radio" name="color" value="rose">
+              <span class="color-dot"></span>
+            </label>
+            <label class="color-option color-amber">
+              <input type="radio" name="color" value="amber">
+              <span class="color-dot"></span>
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">
+          <span>Создать счет</span>
+          <i data-lucide="check"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker registered successfully:', reg.scope))
+          .catch(err => console.log('Service Worker registration failed:', err));
+      });
+    }
+  </script>
+</body>
+</html>
