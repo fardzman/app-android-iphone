@@ -1166,3 +1166,28 @@ body {
 .history-list, .categories-list, .accounts-grid {
   will-change: transform;
 }
+
+.btn-delete-account {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s ease;
+  margin-left: auto;
+}
+
+.btn-delete-account:hover,
+.btn-delete-account:active {
+  color: var(--danger);
+  background: rgba(244, 63, 94, 0.1);
+}
+
+.btn-delete-account svg {
+  width: 14px;
+  height: 14px;
+}

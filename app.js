@@ -512,13 +512,48 @@ function renderAccountsGrid() {
         <div class="account-card-icon" style="color: ${cardColor}">
           <i data-lucide="${iconName}"></i>
         </div>
+        <button class="btn-delete-account" data-id="${acc.id}" aria-label="Удалить счет">
+          <i data-lucide="trash-2"></i>
+        </button>
       </div>
       <span class="account-card-name">${acc.name}</span>
       <span class="account-card-balance">${formatCurrency(acc.balance)}</span>
     `;
     
+    // Bind delete button listener
+    const deleteBtn = card.querySelector('.btn-delete-account');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteAccount(acc.id);
+      });
+    }
+    
     list.appendChild(card);
   });
+}
+
+function deleteAccount(id) {
+  if (state.accounts.length <= 1) {
+    alert("Нельзя удалить единственный счет. Сначала добавьте другой счет.");
+    return;
+  }
+  
+  const account = state.accounts.find(a => a.id === id);
+  if (!account) return;
+  
+  const confirmed = confirm(`Вы действительно хотите удалить счет "${account.name}"?\nЭто также удалит всю историю операций, привязанных к этому счету.`);
+  if (!confirmed) return;
+  
+  // Remove account
+  state.accounts = state.accounts.filter(a => a.id !== id);
+  
+  // Remove related transactions
+  state.transactions = state.transactions.filter(tx => tx.accountId !== id);
+  
+  // Save & re-render
+  saveData();
+  renderApp();
 }
 
 // Categories Progress List under Expenses Tab
