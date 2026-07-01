@@ -57,12 +57,17 @@ function getRelativeDate(offsetDays) {
 
 // Format currency
 function formatCurrency(amount) {
-  return new Intl.NumberFormat('ru-RU', {
-    style: 'currency',
-    currency: 'KZT',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2
-  }).format(amount).replace('KZT', '₸');
+  try {
+    return new Intl.NumberFormat('ru-RU', {
+      style: 'currency',
+      currency: 'KZT',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    }).format(amount).replace('KZT', '₸');
+  } catch (e) {
+    console.warn("Intl currency formatting failed, using fallback.", e);
+    return amount.toFixed(0) + ' ₸';
+  }
 }
 
 // -------------------------------------------------------------
@@ -101,23 +106,33 @@ function updateHeaderDate() {
 
 // Storage Helpers
 function loadData() {
-  const storedAccounts = localStorage.getItem('af_accounts');
-  const storedTransactions = localStorage.getItem('af_transactions');
-  
-  if (storedAccounts && storedTransactions) {
-    state.accounts = JSON.parse(storedAccounts);
-    state.transactions = JSON.parse(storedTransactions);
-  } else {
-    // Fresh launch: use seed data
+  try {
+    const storedAccounts = localStorage.getItem('af_accounts');
+    const storedTransactions = localStorage.getItem('af_transactions');
+    
+    if (storedAccounts && storedTransactions) {
+      state.accounts = JSON.parse(storedAccounts);
+      state.transactions = JSON.parse(storedTransactions);
+    } else {
+      // Fresh launch: use seed data
+      state.accounts = [...SEED_ACCOUNTS];
+      state.transactions = [...SEED_TRANSACTIONS];
+      saveData();
+    }
+  } catch (e) {
+    console.warn("Storage access is blocked or failed. Using seed data.", e);
     state.accounts = [...SEED_ACCOUNTS];
     state.transactions = [...SEED_TRANSACTIONS];
-    saveData();
   }
 }
 
 function saveData() {
-  localStorage.setItem('af_accounts', JSON.stringify(state.accounts));
-  localStorage.setItem('af_transactions', JSON.stringify(state.transactions));
+  try {
+    localStorage.setItem('af_accounts', JSON.stringify(state.accounts));
+    localStorage.setItem('af_transactions', JSON.stringify(state.transactions));
+  } catch (e) {
+    console.warn("Storage write failed.", e);
+  }
 }
 
 // -------------------------------------------------------------
