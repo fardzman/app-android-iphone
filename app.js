@@ -389,6 +389,9 @@ function setupForms() {
     saveData();
     document.getElementById('transactionSheetOverlay').classList.remove('active');
     renderApp();
+    
+    // Trigger cool glowing transaction animation
+    triggerTransactionAnimation(type, amount);
   });
   
   // Add Account Form
@@ -982,5 +985,66 @@ function getPresetGradient(preset) {
     case 'preset-4': return 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)';
     case 'preset-5': return 'linear-gradient(135deg, #d946ef 0%, #ec4899 100%)';
     default: return 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)';
+  }
+}
+
+// -------------------------------------------------------------
+// Transaction Animations
+// -------------------------------------------------------------
+function triggerTransactionAnimation(type, amount) {
+  const balanceCard = document.querySelector('.balance-card');
+  const balanceAmountEl = document.getElementById('totalBalance');
+  if (!balanceCard || !balanceAmountEl) return;
+  
+  // 1. Add Pulse Class to Balance Card
+  const pulseClass = type === 'income' ? 'pulse-income' : 'pulse-expense';
+  balanceCard.classList.remove('pulse-income', 'pulse-expense');
+  void balanceCard.offsetWidth; // Trigger reflow to restart animation
+  balanceCard.classList.add(pulseClass);
+  setTimeout(() => balanceCard.classList.remove(pulseClass), 1000);
+  
+  // 2. Create Floating Number Indicator
+  const floating = document.createElement('div');
+  floating.className = `floating-feedback ${type}`;
+  floating.innerText = `${type === 'income' ? '+' : '-'}${formatCurrency(amount)}`;
+  balanceCard.appendChild(floating);
+  setTimeout(() => floating.remove(), 1200);
+  
+  // 3. Create Particle Burst
+  createParticles(balanceCard, type);
+}
+
+function createParticles(parent, type) {
+  const rect = parent.getBoundingClientRect();
+  const centerX = rect.width / 2;
+  const centerY = rect.height / 2;
+  const color = type === 'income' ? 'var(--success)' : 'var(--danger)';
+  
+  // Create 18 glowing particles
+  for (let i = 0; i < 18; i++) {
+    const particle = document.createElement('div');
+    particle.className = `burst-particle ${type}`;
+    particle.style.backgroundColor = color;
+    particle.style.left = `${centerX}px`;
+    particle.style.top = `${centerY}px`;
+    
+    // Random angle and distance
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 60 + Math.random() * 90;
+    const tx = Math.cos(angle) * distance;
+    const ty = Math.sin(angle) * distance;
+    
+    // Set CSS custom properties for animation
+    particle.style.setProperty('--tx', `${tx}px`);
+    particle.style.setProperty('--ty', `${ty}px`);
+    
+    // Randomize duration and delay
+    particle.style.animationDuration = `${0.6 + Math.random() * 0.4}s`;
+    particle.style.animationDelay = `${Math.random() * 0.15}s`;
+    
+    parent.appendChild(particle);
+    
+    // Cleanup after animation completes
+    setTimeout(() => particle.remove(), 1000);
   }
 }
