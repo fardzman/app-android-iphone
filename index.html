@@ -400,8 +400,23 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('Service Worker registered successfully:', reg.scope))
+          .then(reg => {
+            console.log('Service Worker registered successfully:', reg.scope);
+            
+            // Force a check for service worker updates immediately on page load
+            reg.update();
+          })
           .catch(err => console.log('Service Worker registration failed:', err));
+      });
+
+      // Automatically reload the page when a new service worker takes control (e.g. after skipWaiting)
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          console.log('[PWA] New service worker active. Reloading page...');
+          window.location.reload();
+        }
       });
     }
   </script>
